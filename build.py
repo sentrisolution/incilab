@@ -130,7 +130,7 @@ def social_icons(cls="soc"):
 # ---------------------------------------------------------------- i18n
 # Saytın AZ versiyası şablonlardan yaranır, RU və EN versiyaları isə hazır
 # HTML-dəki mətnlərin i18n.py lüğəti ilə əvəzlənməsi yolu ilə qurulur.
-LANGS = ["az", "ru", "en"]
+LANGS = ["az", "en"]
 LANG_NAMES = {"az": "AZ", "ru": "RU", "en": "EN"}
 MISSING = set()
 HAS_WORD = re.compile(r"[A-Za-zƏəİıÖöÜüĞğŞşÇç]{2,}")

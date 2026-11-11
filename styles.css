@@ -444,3 +444,26 @@ a.ci:hover { border-color: var(--wine); }
   .badge-round { right: 10px; width: 110px; height: 110px; }
   .br--main { grid-row: auto; }
 }
+
+/* ---------- Ana səhifə manşeti: qırmızı (şərab rəngli) fon ---------- */
+.hero { color: #fff; background:
+  radial-gradient(ellipse 60% 50% at 75% 40%, rgba(116, 36, 50, .55), transparent 70%),
+  radial-gradient(ellipse 40% 40% at 10% 90%, rgba(201, 169, 110, .15), transparent 70%),
+  linear-gradient(160deg, var(--ink) 0%, var(--plum) 55%, #3a141c 100%); }
+.hero__grid { background-image: linear-gradient(rgba(233,224,192,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(233,224,192,.05) 1px, transparent 1px); }
+.hero h1 { color: #fff; }
+.hero p { color: rgba(255,255,255,.72); }
+.hero .eyebrow--light { color: var(--champagne); }
+.hero .btn--pearl { background: var(--nacre); background-size: 200% 100%; color: var(--wine-deep); box-shadow: 0 10px 30px rgba(233,224,192,.25), inset 0 1px 0 #fff; }
+.hero .btn--line { border-color: rgba(255,255,255,.35); color: #fff; background: rgba(255,255,255,.04); }
+.hero .btn--line:hover { background: rgba(255,255,255,.12); }
+.hero__social { color: rgba(255,255,255,.6); }
+.hero__social .soc { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.16); box-shadow: none; }
+.hero__social .soc svg { fill: var(--champagne); }
+.hero__social .soc:hover svg { fill: #fff; }
+.hero .orbit { border-color: rgba(233,224,192,.18); }
+.hero .orbit span { background: radial-gradient(circle at 35% 30%, #fff, var(--champagne)); box-shadow: 0 0 16px var(--champagne); }
+.hero .orbit--2 span { background: #f0c9d0; box-shadow: 0 0 14px #f0c9d0; }
+.hero .chip { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.16); box-shadow: none; }
+.hero .chip b { color: var(--champagne); }
+.hero .chip small { color: rgba(255,255,255,.65); }
