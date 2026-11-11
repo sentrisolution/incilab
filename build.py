@@ -421,7 +421,6 @@ def build_home():
           {ext(LINKS["results"], "Onlayn nəticə", "btn btn--pearl")}
           {ext(LINKS["booking"], "E-randevu", "btn btn--line")}
         </div>
-        <div class="hero__social reveal"><span>Bizi izləyin</span>{social_icons()}</div>
       </div>
       <div class="hero__visual" id="pearlScene">
         <div class="orbit orbit--1"><span></span></div>
