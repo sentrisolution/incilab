@@ -4,7 +4,14 @@
 Ortaq header/footer və bütün məzmun buradadır. Dəyişiklikdən sonra:
     python3 build.py
 """
+import re
 from pathlib import Path
+from urllib.parse import quote, unquote
+
+try:
+    from i18n import TR
+except ImportError:
+    TR = {}
 
 OUT = Path(__file__).parent
 
@@ -106,6 +113,82 @@ NAV = [
 SERVICE_SUB = [("xidmetler.html", "Laborator istiqamətlər"), ("ferdi.html", "Fərdi xidmətlər"), ("korporativ.html", "Korporativ xidmətlər"), (LINKS["tests"], "Test bələdçisi ↗")]
 
 
+ICON = dict(
+    phone='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg>',
+    fb='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 21v-7.5h2.5l.4-3h-2.9V8.6c0-.9.25-1.5 1.5-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.8 1.4-3.8 3.9v2.3H8v3h2.5V21z"/></svg>',
+    ig='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7.3a4.7 4.7 0 1 0 0 9.4 4.7 4.7 0 0 0 0-9.4zm0 7.7a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm6-7.9a1.1 1.1 0 1 1-2.2 0 1.1 1.1 0 0 1 2.2 0zM21 8.1c-.1-1.5-.4-2.8-1.5-3.9S17.1 2.8 15.6 2.7C14 2.6 10 2.6 8.4 2.7 6.9 2.8 5.6 3.1 4.5 4.2S3.1 6.6 3 8.1c-.1 1.6-.1 6.2 0 7.8.1 1.5.4 2.8 1.5 3.9s2.4 1.4 3.9 1.5c1.6.1 5.6.1 7.2 0 1.5-.1 2.8-.4 3.9-1.5s1.4-2.4 1.5-3.9c.1-1.6.1-6.2 0-7.8zm-2 9.5a3 3 0 0 1-1.7 1.7c-1.2.5-4 .4-5.3.4s-4.1.1-5.3-.4a3 3 0 0 1-1.7-1.7c-.5-1.2-.4-4-.4-5.3s-.1-4.1.4-5.3a3 3 0 0 1 1.7-1.7c1.2-.5 4-.4 5.3-.4s4.1-.1 5.3.4a3 3 0 0 1 1.7 1.7c.5 1.2.4 4 .4 5.3s.1 4.1-.4 5.3z"/></svg>',
+    yt='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.6 7.2a2.5 2.5 0 0 0-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4A2.5 2.5 0 0 0 2.4 7.2C2 8.8 2 12 2 12s0 3.2.4 4.8a2.5 2.5 0 0 0 1.8 1.8c1.6.4 7.8.4 7.8.4s6.2 0 7.8-.4a2.5 2.5 0 0 0 1.8-1.8c.4-1.6.4-4.8.4-4.8s0-3.2-.4-4.8zM10 15V9l5.2 3z"/></svg>',
+)
+
+
+def social_icons(cls="soc"):
+    return "".join(f'<a href="{LINKS[k]}" target="_blank" rel="noopener" class="{cls} {cls}--{k}" aria-label="{n}">{ICON[k]}</a>'
+                   for k, n in (("ig", "Instagram"), ("fb", "Facebook"), ("yt", "YouTube")))
+
+
+# ---------------------------------------------------------------- i18n
+# Saytın AZ versiyası şablonlardan yaranır, RU və EN versiyaları isə hazır
+# HTML-dəki mətnlərin i18n.py lüğəti ilə əvəzlənməsi yolu ilə qurulur.
+LANGS = ["az", "ru", "en"]
+LANG_NAMES = {"az": "AZ", "ru": "RU", "en": "EN"}
+MISSING = set()
+HAS_WORD = re.compile(r"[A-Za-zƏəİıÖöÜüĞğŞşÇç]{2,}")
+SKIP = re.compile(r"^(\S+@\S+|https?://\S+|[\d\s()+*.:–-]+)$")
+
+
+def tr(text, lang):
+    if lang == "az":
+        return text
+    if text in TR:
+        return TR[text][0 if lang == "ru" else 1]
+    if not HAS_WORD.search(text) or SKIP.match(text):
+        return text
+    if " — " in text:
+        return " — ".join(tr(part, lang) for part in text.split(" — "))
+    MISSING.add(text)
+    return text
+
+
+def tr_keep_space(seg, lang):
+    core = seg.strip()
+    if not core:
+        return seg
+    i = seg.index(core)
+    return seg[:i] + tr(core, lang) + seg[i + len(core):]
+
+
+def lang_links(lang, filename):
+    def href(target):
+        if target == lang:
+            return filename
+        base = "" if lang == "az" else "../"
+        return base + ("" if target == "az" else target + "/") + filename
+    return "".join(f'<a href="{href(l)}" hreflang="{l}"{" class=on" if l == lang else ""}>{LANG_NAMES[l]}</a>' for l in LANGS)
+
+
+def localize(html, lang, filename):
+    html = html.replace("@@LANGS@@", lang_links(lang, filename))
+    if lang == "az":
+        return html
+    html = html.replace('<html lang="az">', f'<html lang="{lang}">')
+    for a, b in (('href="assets/', 'href="../assets/'), ('src="assets/', 'src="../assets/'),
+                 ('href="styles.css"', 'href="../styles.css"'), ('src="script.js"', 'src="../script.js"')):
+        html = html.replace(a, b)
+
+    def fix_tag(tag):
+        def attr(m):
+            name, val = m.group(1), m.group(2)
+            if name == "content" and not tag.startswith('<meta name="description"'):
+                return m.group(0)
+            return f'{name}="{tr(val, lang)}"'
+        tag = re.sub(r'\b(alt|title|aria-label|placeholder|content)="([^"]*)"', attr, tag)
+        tag = re.sub(r'(wa\.me/\d+\?text=)([^"]+)', lambda m: m.group(1) + quote(tr(unquote(m.group(2)), lang)), tag)
+        return tag
+
+    parts = re.split(r"(<svg.*?</svg>|<[^>]+>)", html, flags=re.S)
+    return "".join(fix_tag(p) if p.startswith("<") else tr_keep_space(p, lang) for p in parts)
+
+
 # ---------------------------------------------------------------- helpers
 def nav_html(active):
     out = []
@@ -132,7 +215,7 @@ def page(filename, title, desc, body, dark_hero=True):
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{full_title}</title>
   <meta name="description" content="{desc}">
-  <meta name="theme-color" content="#2a0f15">
+  <meta name="theme-color" content="#fffcf2">
   <link rel="icon" href="assets/incilab-logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -146,14 +229,19 @@ def page(filename, title, desc, body, dark_hero=True):
       <a href="index.html" class="logo"><img src="assets/incilab-logo.png" alt="İnci Laboratoriyaları"></a>
       <nav class="nav" id="nav">
           {nav_html(filename)}
+          <div class="nav__soc">{social_icons()}</div>
       </nav>
       <div class="header__actions">
-        <a href="tel:{HOTLINE}" class="hotline"><span>Qaynar xətt</span><b>*{HOTLINE}</b></a>
+        <a href="tel:{HOTLINE}" class="hotline" aria-label="Qaynar xətt">{ICON["phone"]}<b>*{HOTLINE}</b></a>
+        <div class="langs">@@LANGS@@</div>
         {ext(LINKS["results"], "Onlayn nəticə", "btn btn--pearl btn--sm")}
       </div>
+      <div class="langs langs--m">@@LANGS@@</div>
       <button class="burger" id="burger" aria-label="Menyu"><span></span><span></span></button>
     </div>
   </header>
+
+  <aside class="rail" aria-label="Sosial şəbəkələr">{social_icons()}<span>Bizi izləyin</span></aside>
 
 {body}
 
@@ -162,7 +250,7 @@ def page(filename, title, desc, body, dark_hero=True):
     <div class="container footer__top">
       <div class="footer__brand">
         <div class="footer__pearl"></div>
-        <p class="footer__slogan">Sağlamlığınız üçün<br><em>daim xidmətinizdəyik.</em></p>
+        <p class="footer__slogan">Sağlamlığınız üçün daim xidmətinizdəyik.</p>
       </div>
       <div>
         <h5>Menyu</h5>
@@ -178,7 +266,7 @@ def page(filename, title, desc, body, dark_hero=True):
       </div>
       <div>
         <h5>Əlaqə</h5>
-        <a href="tel:{HOTLINE}">Qaynar xətt: *{HOTLINE}</a>
+        <a href="tel:{HOTLINE}" class="f-ic">{ICON["phone"]} *{HOTLINE}</a>
         <a href="tel:{PHONE_TEL}">{PHONE}</a>
         <a href="https://wa.me/{WA_TEL}" target="_blank" rel="noopener">WhatsApp: {WA}</a>
         <a href="mailto:{EMAIL}">{EMAIL}</a>
@@ -187,7 +275,7 @@ def page(filename, title, desc, body, dark_hero=True):
     </div>
     <div class="container footer__bottom">
       <span>© <span id="year"></span> İnci Laboratoriyaları. Müəllif haqları qorunur.</span>
-      <span class="socials">{ext(LINKS["fb"], "Facebook")}{ext(LINKS["ig"], "Instagram")}{ext(LINKS["yt"], "YouTube")}</span>
+      <span class="socials">{social_icons()}</span>
     </div>
   </footer>
 
@@ -199,7 +287,11 @@ def page(filename, title, desc, body, dark_hero=True):
 </body>
 </html>
 """
-    (OUT / filename).write_text(html, encoding="utf-8")
+    for lang in LANGS:
+        out = localize(html, lang, filename)
+        d = OUT if lang == "az" else OUT / lang
+        d.mkdir(exist_ok=True)
+        (d / filename).write_text(out, encoding="utf-8")
     print("✓", filename)
 
 
@@ -252,7 +344,7 @@ def checkup_cards():
           <div class="cu__pearl"><span>{sym}</span></div>
           <h3>{name}</h3>
           <p>{d}</p>
-          <a href="https://wa.me/{WA_TEL}?text={('Salam! ' + name + ' check-up paketi haqqında məlumat almaq istəyirəm.').replace(' ', '%20')}" target="_blank" rel="noopener" class="cu__link">Məlumat al →</a>
+          <a href="https://wa.me/{WA_TEL}?text={('Salam! ' + name + ('' if 'check-up' in name else ' check-up') + ' paketi haqqında məlumat almaq istəyirəm.').replace(' ', '%20')}" target="_blank" rel="noopener" class="cu__link">Məlumat al →</a>
         </div>""" for name, d, sym in CHECKUPS)
 
 
@@ -299,7 +391,7 @@ CTA = f"""  <section class="cta">
     <div class="container cta__inner reveal">
       <div class="cta__pearl"></div>
       <div>
-        <h2>Sağlamlığınıza bu gün <em>diqqət</em> edin.</h2>
+        <h2>Sağlamlığınıza bu gün diqqət edin.</h2>
         <p>Randevu, məsləhət və ya check-up üçün bizimlə əlaqə saxlayın.</p>
       </div>
       <div class="cta__actions">
@@ -317,12 +409,13 @@ def build_home():
     <div class="container hero__inner">
       <div class="hero__text">
         <span class="eyebrow eyebrow--light reveal">Klinik laborator diaqnostika · 2017-ci ildən</span>
-        <h1 class="reveal">Azərbaycanın<br>bir <em>incisi.</em></h1>
+        <h1 class="reveal">Azərbaycanın bir incisi.</h1>
         <p class="reveal">Klinik laborator diaqnostikanın bütün sahələrində keyfiyyətli və dəqiq xidmət — tam avtomatlaşdırılmış analizatorlar, beynəlxalq standartlar və 4000+ testlik geniş baza.</p>
         <div class="hero__btns reveal">
           {ext(LINKS["results"], "Onlayn nəticə", "btn btn--pearl")}
           {ext(LINKS["booking"], "E-randevu", "btn btn--line")}
         </div>
+        <div class="hero__social reveal"><span>Bizi izləyin</span>{social_icons()}</div>
       </div>
       <div class="hero__visual" id="pearlScene">
         <div class="orbit orbit--1"><span></span></div>
@@ -344,7 +437,7 @@ def build_home():
   <section class="section">
     <div class="container">
       <div class="head reveal">
-        <div><span class="eyebrow">Xidmət sahələri</span><h2>Bir damladan<br><em>dəqiq cavaba.</em></h2></div>
+        <div><span class="eyebrow">Xidmət sahələri</span><h2>Bir damladan dəqiq cavaba.</h2></div>
         <p>Tibbi biokimyadan molekulyar mikrobiologiyaya qədər — 10 laborator istiqamət bir ünvanda.</p>
       </div>
       <div class="bento">
@@ -357,7 +450,7 @@ def build_home():
     <div class="container">
       <div class="head head--center reveal">
         <span class="eyebrow eyebrow--light">Necə işləyir</span>
-        <h2>Dörd addımda <em>nəticə.</em></h2>
+        <h2>Dörd addımda nəticə.</h2>
       </div>
       <ol class="steps">
 {steps()}
@@ -384,7 +477,7 @@ def build_home():
   <section class="section section--nacre">
     <div class="container">
       <div class="head reveal">
-        <div><span class="eyebrow">Check-up</span><h2>Sağlamlığınızın<br><em>incilərini</em> qoruyun.</h2></div>
+        <div><span class="eyebrow">Check-up</span><h2>Sağlamlığınızın incilərini qoruyun.</h2></div>
         <p>Yaşa, cinsə və ehtiyaca uyğun 8 check-up paketi. Hansının sizə uyğun olduğunu birlikdə seçək.</p>
       </div>
       <div class="cus">
@@ -398,7 +491,7 @@ def build_home():
       <div class="about-home__img reveal"><img src="assets/lab-1.jpg" alt="İnci Laboratoriyalarında analiz"><div class="badge-round"><b>2017</b><span>ildən</span></div></div>
       <div class="reveal">
         <span class="eyebrow">Biz kimik</span>
-        <h2>Daim inkişaf edən <em>laboratoriya.</em></h2>
+        <h2>Daim inkişaf edən laboratoriya.</h2>
         <p>İnci Laboratoriyaları biokimya, mikrobiologiya, immunologiya və molekulyar genetika sahələrində tam avtomatlaşdırılmış analizatorlarla xidmət göstərir. EUCAST, CLSI və ISO kimi müstəqil qurumların keyfiyyət standartları əsas götürülür.</p>
         <ul class="ticks">
           <li>Tibbi mikrobiologiya və biokimya mütəxəssisləri</li>
@@ -413,7 +506,7 @@ def build_home():
   <section class="section section--soft">
     <div class="container">
       <div class="head reveal">
-        <div><span class="eyebrow">Xəbərlər</span><h2>Son <em>yeniliklər.</em></h2></div>
+        <div><span class="eyebrow">Xəbərlər</span><h2>Son yeniliklər.</h2></div>
         <a href="xeberler.html" class="link-arrow">Bütün xəbərlər →</a>
       </div>
       <div class="newsgrid">
@@ -435,7 +528,7 @@ def build_about():
       <div class="about-home__img reveal"><img src="assets/lab-4.jpg" alt="Mikroskop"><div class="badge-round"><b>4000+</b><span>test</span></div></div>
       <div class="reveal">
         <span class="eyebrow">İnci Laboratoriyaları</span>
-        <h2>Bütün sahələrdə <em>keyfiyyət və dəqiqlik.</em></h2>
+        <h2>Bütün sahələrdə keyfiyyət və dəqiqlik.</h2>
         <p>İnci Laboratoriyaları klinik laborator diaqnostikanın bütün sahələrində — biokimya, mikrobiologiya, immunologiya və molekulyar genetika üzrə xidmət göstərir. Laboratoriyamızda tam avtomatlaşdırılmış biokimyəvi, mikrobioloji, immunoloji və genetik analizatorlardan istifadə olunur.</p>
         <p>Xidmətlərimizdə EUCAST, CLSI və ISO kimi müstəqil qurumların keyfiyyət standartları əsas istiqamət götürülür. Laboratoriyamız fəaliyyətini ISO 15189 akkreditasiyasının tələblərinə uyğunlaşdırır.</p>
       </div>
@@ -457,7 +550,7 @@ def build_about():
 
   <section class="section">
     <div class="container">
-      <div class="head head--center reveal"><span class="eyebrow">Tariximiz</span><h2>İlk laboratoriyadan <em>şəbəkəyə.</em></h2></div>
+      <div class="head head--center reveal"><span class="eyebrow">Tariximiz</span><h2>İlk laboratoriyadan şəbəkəyə.</h2></div>
       <ol class="timeline">
 {tl}
       </ol>
@@ -466,7 +559,7 @@ def build_about():
 
   <section class="section section--nacre">
     <div class="container">
-      <div class="head head--center reveal"><span class="eyebrow">Keyfiyyət</span><h2>Etibar edilən <em>standartlar.</em></h2></div>
+      <div class="head head--center reveal"><span class="eyebrow">Keyfiyyət</span><h2>Etibar edilən standartlar.</h2></div>
       <div class="quality">
         <div class="q reveal"><b>ISO 15189</b><span>Tibbi laboratoriyalar üçün akkreditasiya tələblərinə uyğunlaşma</span></div>
         <div class="q reveal"><b>EUCAST</b><span>Antimikrob həssaslıq testləri üzrə Avropa standartları</span></div>
@@ -499,7 +592,7 @@ def build_services():
   <section class="section section--nacre">
     <div class="container">
       <div class="head reveal">
-        <div><span class="eyebrow">Test bələdçisi</span><h2>Test <em>qrupları.</em></h2></div>
+        <div><span class="eyebrow">Test bələdçisi</span><h2>Test qrupları.</h2></div>
         {ext(LINKS["tests"], "Test bələdçisini aç ↗", "btn btn--wine")}
       </div>
       <div class="tags reveal">{groups}</div>
@@ -523,7 +616,7 @@ def build_individual():
 
   <section class="section section--ink">
     <div class="container">
-      <div class="head head--center reveal"><span class="eyebrow eyebrow--light">Necə işləyir</span><h2>Dörd addımda <em>nəticə.</em></h2></div>
+      <div class="head head--center reveal"><span class="eyebrow eyebrow--light">Necə işləyir</span><h2>Dörd addımda nəticə.</h2></div>
       <ol class="steps">
 {steps()}
       </ol>
@@ -608,7 +701,7 @@ def build_contact():
   <section class="section">
     <div class="container contact">
       <div class="contact__info reveal">
-        <a href="tel:{HOTLINE}" class="ci ci--big"><small>Qaynar xətt</small><b>*{HOTLINE}</b></a>
+        <a href="tel:{HOTLINE}" class="ci ci--big"><small class="f-ic">{ICON["phone"]}</small><b>*{HOTLINE}</b></a>
         <a href="tel:{PHONE_TEL}" class="ci"><small>Telefon</small><b>{PHONE}</b></a>
         <a href="https://wa.me/{WA_TEL}" target="_blank" rel="noopener" class="ci"><small>WhatsApp</small><b>{WA}</b></a>
         <a href="mailto:{EMAIL}" class="ci"><small>E-poçt</small><b>{EMAIL}</b></a>
@@ -632,3 +725,6 @@ def build_contact():
 if __name__ == "__main__":
     build_home(); build_about(); build_services(); build_individual(); build_corporate()
     build_checkup(); build_branches(); build_news(); build_contact()
+    if MISSING:
+        Path(OUT / "i18n_missing.txt").write_text("\n".join(sorted(MISSING)), encoding="utf-8")
+        print(f"! {len(MISSING)} tərcüməsiz mətn — i18n_missing.txt")

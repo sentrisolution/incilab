@@ -27,7 +27,7 @@ const cio = new IntersectionObserver(entries => {
     const el = e.target, end = +el.dataset.count, t0 = performance.now(), dur = 1600;
     const tick = t => {
       const p = Math.min((t - t0) / dur, 1), v = Math.round(end * (1 - Math.pow(1 - p, 3)));
-      el.textContent = v.toLocaleString('az');
+      el.textContent = v.toLocaleString(document.documentElement.lang || 'az');
       if (p < 1) requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
@@ -51,7 +51,8 @@ if (scene && pearl && matchMedia('(pointer: fine)').matches) {
 document.getElementById('form')?.addEventListener('submit', e => {
   e.preventDefault();
   const f = new FormData(e.target);
-  const text = `Salam! Saytdan müraciət:\n👤 ${f.get('name')}\n📞 ${f.get('phone')}\n📌 ${f.get('topic')}\n💬 ${f.get('message') || '-'}`;
+  const hi = { az: 'Salam! Saytdan müraciət:', ru: 'Здравствуйте! Заявка с сайта:', en: 'Hello! Website enquiry:' }[document.documentElement.lang] || 'Salam!';
+  const text = `${hi}\n👤 ${f.get('name')}\n📞 ${f.get('phone')}\n📌 ${f.get('topic')}\n💬 ${f.get('message') || '-'}`;
   window.open(`https://wa.me/994512294980?text=${encodeURIComponent(text)}`, '_blank');
 });
 
