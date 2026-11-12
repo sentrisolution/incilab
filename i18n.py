@@ -227,6 +227,8 @@ TR = {
 
     # --- Filiallar
     "Filiallarımız": ("Наши филиалы", "Our branches"),
+    "Bakı, Tovuz və Zaqatalada xidmətinizdəyik.": ("Мы работаем в Баку, Товузе и Загатале.", "We serve you in Baku, Tovuz and Zagatala."),
+    "İnci Laboratoriyalarının filialları: Mərkəzi Laboratoriya, Gənclik, Tovuz, Zaqatala.": ("Филиалы Лабораторий İnci: Центральная лаборатория, Гянджлик, Товуз, Загатала.", "İnci Laboratories branches: Central Laboratory, Ganjlik, Tovuz, Zagatala."),
     "Bakı, Gəncə, Tovuz və Zaqatalada xidmətinizdəyik.": ("Мы работаем в Баку, Гяндже, Товузе и Загатале.", "We serve you in Baku, Ganja, Tovuz and Zagatala."),
     "Mərkəzi Laboratoriya": ("Центральная лаборатория", "Central Laboratory"),
     "Bakı": ("Баку", "Baku"),

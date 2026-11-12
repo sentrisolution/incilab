@@ -77,17 +77,14 @@ CHECKUPS = [
 
 TIMELINE = [
     ("2017", "Bakıda, HB Güven Klinikasının daxilində ilk laboratoriya fəaliyyətə başladı."),
-    ("2017", "Sentyabrda ikinci laboratoriya Gəncədə açıldı."),
     ("2018", "Payızda Tovuz laboratoriyası açıldı. İlin sonunda Bakıda Mərkəzi Laboratoriya istifadəyə verildi."),
     ("2019", "2002-ci ildən fəaliyyət göstərən Acıbadem Labmed laboratoriyası ilə əməkdaşlıq müqaviləsi imzalandı."),
     ("2020", "Sumqayıt laboratoriyası fəaliyyətə başladı."),
-    ("2026", "Laboratoriya və patoloji xidmətləri Gəncədə istifadəyə verildi."),
 ]
 
 BRANCHES = [
     ("Mərkəzi Laboratoriya", "Bakı", "Əhməd Rəcəbli 19R", True),
     ("Gənclik filialı", "Bakı", "HB Güven Klinikası", False),
-    ("Gəncə filialı", "Gəncə", "Laboratoriya və patologiya xidmətləri", False),
     ("Tovuz filialı", "Tovuz", "İnci Clinic Tovuz", False),
     ("Zaqatala filialı", "Zaqatala", "", False),
 ]
@@ -97,8 +94,6 @@ NEWS = [
      "İnci Laboratoriyalarında HYDRASYS 2 SCAN sistemi ilə zülal elektroforezi və oliqoklonal zolaqların təyini artıq mümkündür."),
     ("10 aprel 2026", "İnci Laboratoriyaları Beynəlxalq Konfransda", "news-konfrans.png",
      "Mütəxəssislərimiz beynəlxalq konfransda iştirak edərək laborator diaqnostika sahəsində təcrübələrini bölüşdülər."),
-    ("15 mart 2026", "Laboratoriya və Patoloji Xidmətləri artıq Gəncədə", "news-gence.jpg",
-     "İnci Laboratoriyalarının laboratoriya və patoloji xidmətləri artıq Gəncə şəhərində də əlçatandır."),
 ]
 
 NAV = [
@@ -380,7 +375,7 @@ def stats():
     return """      <div class="stats">
         <div class="stat reveal"><b data-count="4000">0</b><i>+</i><span>test</span></div>
         <div class="stat reveal"><b data-count="20">0</b><i>+</i><span>xidmət</span></div>
-        <div class="stat reveal"><b data-count="5">0</b><i>+</i><span>filial</span></div>
+        <div class="stat reveal"><b data-count="4">0</b><span>filial</span></div>
         <div class="stat reveal"><b data-count="50">0</b><i>+</i><span>əməkdaş</span></div>
       </div>"""
 
@@ -671,7 +666,7 @@ def build_checkup():
 
 
 def build_branches():
-    body = f"""{page_hero("Filiallarımız", "Filiallar", "Bakı, Gəncə, Tovuz və Zaqatalada xidmətinizdəyik.")}
+    body = f"""{page_hero("Filiallarımız", "Filiallar", "Bakı, Tovuz və Zaqatalada xidmətinizdəyik.")}
 
   <section class="section">
     <div class="container brs">
@@ -680,7 +675,7 @@ def build_branches():
   </section>
 
 {CTA}"""
-    page("filiallar.html", "Filiallar", "İnci Laboratoriyalarının filialları: Mərkəzi Laboratoriya, Gənclik, Gəncə, Tovuz, Zaqatala.", body)
+    page("filiallar.html", "Filiallar", "İnci Laboratoriyalarının filialları: Mərkəzi Laboratoriya, Gənclik, Tovuz, Zaqatala.", body)
 
 
 def build_news():
