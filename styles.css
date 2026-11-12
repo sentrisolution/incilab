@@ -467,3 +467,9 @@ a.ci:hover { border-color: var(--wine); }
 .hero .chip { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.16); box-shadow: none; }
 .hero .chip b { color: var(--champagne); }
 .hero .chip small { color: rgba(255,255,255,.65); }
+
+/* ---------- Daxili səhifələrin başlıqları: qırmızı (şərab rəngli) fon ---------- */
+.phero { color: #fff; background: radial-gradient(ellipse 50% 70% at 85% 50%, rgba(116,36,50,.6), transparent 70%), radial-gradient(ellipse 40% 60% at 5% 100%, rgba(201,169,110,.12), transparent 70%), linear-gradient(160deg, var(--ink) 0%, var(--plum) 55%, #3a141c 100%); }
+.phero h1 { color: #fff; }
+.phero p { color: rgba(255,255,255,.72); }
+.phero .eyebrow--light { color: var(--champagne); }
